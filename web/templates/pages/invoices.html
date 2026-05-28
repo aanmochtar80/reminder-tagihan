@@ -84,10 +84,10 @@
                             formattedAmount: '{{formatRupiah .Amount}}',
                             dueDate: '{{.DueDate.Format "2006-01-02"}}',
                             isRecurring: {{.IsRecurring}}
-                        })" class="bg-blue-500 hover:bg-blue-600 text-white text-xs font-semibold px-2 py-1.5 rounded shadow-sm">Edit</button>
+                        })" class="text-white text-xs font-semibold px-2 py-1.5 rounded shadow-sm hover:opacity-80 transition" style="background-color: #3b82f6;">Edit</button>
                         
                         <form method="POST" action="/invoices/{{.ID}}/delete" onsubmit="return confirm('Hapus tagihan ini secara permanen?');">
-                            <button type="submit" class="bg-red-500 hover:bg-red-600 text-white text-xs font-semibold px-2 py-1.5 rounded shadow-sm">Hapus</button>
+                            <button type="submit" class="text-white text-xs font-semibold px-2 py-1.5 rounded shadow-sm hover:opacity-80 transition" style="background-color: #ef4444;">Hapus</button>
                         </form>
                     </td>
                 </tr>
