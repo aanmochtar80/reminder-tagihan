@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"sync"
 
 	"go.mau.fi/whatsmeow"
 	"go.mau.fi/whatsmeow/store/sqlstore"
@@ -13,8 +14,11 @@ import (
 	"google.golang.org/protobuf/proto"
 )
 
-var WAClient *whatsmeow.Client
-var QRChan chan string
+var (
+	WAClient *whatsmeow.Client
+	CurrentQR string
+	qrMutex   sync.RWMutex
+)
 
 func InitWhatsApp() {
 	dbLog := waLog.Stdout("Database", "WARN", true)
@@ -32,8 +36,6 @@ func InitWhatsApp() {
 	clientLog := waLog.Stdout("Client", "WARN", true)
 	WAClient = whatsmeow.NewClient(deviceStore, clientLog)
 	
-	QRChan = make(chan string)
-
 	if WAClient.Store.ID == nil {
 		// No ID stored, new login
 		qrChan, _ := WAClient.GetQRChannel(context.Background())
@@ -45,12 +47,9 @@ func InitWhatsApp() {
 		go func() {
 			for evt := range qrChan {
 				if evt.Event == "code" {
-					// Send QR code to channel so handler can read it
-					select {
-					case QRChan <- evt.Code:
-					default:
-						// if no one is reading, just drop or replace
-					}
+					qrMutex.Lock()
+					CurrentQR = evt.Code
+					qrMutex.Unlock()
 				} else {
 					fmt.Println("WhatsApp Login event:", evt.Event)
 				}

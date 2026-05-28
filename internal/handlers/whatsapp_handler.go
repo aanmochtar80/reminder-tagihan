@@ -31,11 +31,10 @@ func GetWhatsAppQR(c *gin.Context) {
 		return
 	}
 
-	// Try to get QR code string from channel
-	select {
-	case qrStr := <-services.QRChan:
+	qrStr := services.GetCurrentQR()
+	if qrStr != "" {
 		c.JSON(http.StatusOK, gin.H{"qr": qrStr, "status": "waiting"})
-	default:
+	} else {
 		c.JSON(http.StatusOK, gin.H{"qr": "", "status": "loading"})
 	}
 }
