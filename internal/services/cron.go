@@ -58,7 +58,7 @@ func ProcessReminders() {
 
 	// Fetch custom template from Settings DB
 	var setting models.Setting
-	tmplStr := "Halo {{.nama}},\n\nTagihan layanan {{.layanan}} Anda sebesar Rp {{.nominal}} akan jatuh tempo pada {{.tanggal}}.\n\nMohon segera melakukan pembayaran. Abaikan pesan ini jika sudah membayar.\n\nPembayaran bisa melalui :\n- Bank BNI 0456659645\n- Bank BCA 7974208688\n- Bank Jago 103633049732\n- DANA 085255627216\n- OVO 085255627216\nA.N Hamzah Mochtar\n\nTerima kasih."
+	tmplStr := "Halo *{{.nama}}* 👋,\n\nTagihan layanan *{{.layanan}}* Anda sebesar *Rp {{.nominal}}* 💰 akan jatuh tempo pada *{{.tanggal}}* 📅.\n\nMohon segera melakukan pembayaran. _(Abaikan pesan ini jika sudah membayar)._\n\n💳 *Pembayaran bisa melalui:*\n🏦 Bank BNI: 0456659645\n🏦 Bank BCA: 7974208688\n🏦 Bank Jago: 103633049732\n📱 DANA: 085255627216\n📱 OVO: 085255627216\n👤 *A.N Hamzah Mochtar*\n\nTerima kasih 🙏"
 	if err := configs.DB.Where("key = ?", "reminder_template").First(&setting).Error; err == nil && setting.Value != "" {
 		tmplStr = setting.Value
 	}
