@@ -133,6 +133,7 @@ func main() {
 		protected.POST("/invoices/:id/delete", handlers.DeleteInvoice)
 		protected.POST("/invoices/generate", handlers.GenerateInvoices)
 		protected.POST("/invoices/send-reminders", handlers.TriggerReminders)
+		protected.POST("/invoices/send-selected-reminders", handlers.SendSelectedReminders)
 		protected.GET("/whatsapp", handlers.ShowWhatsAppPage)
 		protected.POST("/whatsapp/disconnect", handlers.DisconnectWhatsApp)
 		protected.GET("/settings", handlers.ShowSettings)

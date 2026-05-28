@@ -94,6 +94,17 @@ func TriggerReminders(c *gin.Context) {
 	c.Redirect(http.StatusFound, "/invoices")
 }
 
+func SendSelectedReminders(c *gin.Context) {
+	invoiceIDs := c.PostFormArray("invoice_ids[]")
+	if len(invoiceIDs) > 0 {
+		go services.ProcessSelectedReminders(invoiceIDs)
+		session := sessions.Default(c)
+		session.Set("flash", fmt.Sprintf("Proses pengiriman %d pengingat WhatsApp terpilih sedang berjalan di latar belakang.", len(invoiceIDs)))
+		session.Save()
+	}
+	c.Redirect(http.StatusFound, "/invoices")
+}
+
 func CreateInvoice(c *gin.Context) {
 	customerID, _ := strconv.Atoi(c.PostForm("customer_id"))
 	amount, _ := strconv.ParseFloat(c.PostForm("amount"), 64)

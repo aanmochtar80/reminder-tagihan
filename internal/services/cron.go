@@ -131,6 +131,68 @@ func ProcessReminders() {
 	}
 }
 
+func ProcessSelectedReminders(invoiceIDs []string) {
+	if WAClient == nil || !WAClient.IsConnected() || !WAClient.IsLoggedIn() {
+		log.Println("Manual reminder skipped: WhatsApp not connected")
+		return
+	}
+
+	var invoices []models.Invoice
+	configs.DB.Preload("Customer").Where("id IN ?", invoiceIDs).Find(&invoices)
+
+	var setting models.Setting
+	tmplStr := "Halo *{{.nama}}* 👋,\n\nTagihan layanan *{{.layanan}}* Anda sebesar *Rp {{.nominal}}* 💰 akan jatuh tempo pada *{{.tanggal}}* 📅.\n\nMohon segera melakukan pembayaran. _(Abaikan pesan ini jika sudah membayar)._\n\n💳 *Pembayaran bisa melalui:*\n🏦 Bank BNI: 0456659645\n🏦 Bank BCA: 7974208688\n🏦 Bank Jago: 103633049732\n📱 DANA: 085255627216\n📱 OVO: 085255627216\n👤 *A.N Hamzah Mochtar*\n\nTerima kasih 🙏"
+	if err := configs.DB.Where("key = ?", "reminder_template").First(&setting).Error; err == nil && setting.Value != "" {
+		tmplStr = setting.Value
+	}
+	tmpl, err := template.New("msg").Parse(tmplStr)
+	if err != nil {
+		log.Printf("Failed to parse template: %v", err)
+		return
+	}
+
+	for _, inv := range invoices {
+		if !inv.Customer.IsActive {
+			continue
+		}
+
+		var buf bytes.Buffer
+		data := map[string]interface{}{
+			"nama":    inv.Customer.Name,
+			"layanan": inv.ItemName,
+			"nominal": formatCurrency(inv.Amount),
+			"tanggal": inv.DueDate.Format("02 Jan 2006"),
+			"invoice": inv.InvoiceNumber,
+		}
+		tmpl.Execute(&buf, data)
+
+		phone := inv.Customer.Phone
+		if strings.HasPrefix(phone, "0") {
+			phone = "62" + phone[1:]
+		}
+		jid := phone + "@s.whatsapp.net"
+
+		err := SendMessage(jid, buf.String())
+
+		status := "success"
+		errMsg := ""
+		if err != nil {
+			status = "failed"
+			errMsg = err.Error()
+		}
+
+		logEntry := models.WhatsAppLog{
+			CustomerID:   inv.CustomerID,
+			InvoiceID:    &inv.ID,
+			Type:         "manual_reminder",
+			Message:      buf.String(),
+			Status:       status,
+			ErrorMessage: errMsg,
+		}
+		configs.DB.Create(&logEntry)
+	}
+}
+
 // Helper to generate monthly invoices (Can be run on the 1st of every month)
 func GenerateMonthlyInvoices() {
 	var recurringInvoices []models.Invoice
