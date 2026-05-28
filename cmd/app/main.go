@@ -124,6 +124,8 @@ func main() {
 		protected.GET("/dashboard", handlers.ShowDashboard)
 		protected.GET("/customers", handlers.ListCustomers)
 		protected.POST("/customers", handlers.CreateCustomer)
+		protected.POST("/customers/:id/edit", handlers.UpdateCustomer)
+		protected.POST("/customers/:id/delete", handlers.DeleteCustomer)
 		protected.GET("/invoices", handlers.ListInvoices)
 		protected.POST("/invoices", handlers.CreateInvoice)
 		protected.POST("/invoices/:id/pay", handlers.MarkInvoicePaid)
