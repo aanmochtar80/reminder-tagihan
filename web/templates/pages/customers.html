@@ -83,7 +83,28 @@
                 </button>
             </div>
             
-            <form action="/customers" method="POST" class="p-6">
+            <form action="/customers" method="POST" class="p-6" x-data="{ 
+                rawAmount: '', 
+                formattedAmount: '',
+                selectedDate: '',
+                formatCurrency() {
+                    let val = this.formattedAmount.replace(/\D/g, '');
+                    this.rawAmount = val;
+                    if (val) {
+                        this.formattedAmount = new Intl.NumberFormat('id-ID').format(val);
+                    } else {
+                        this.formattedAmount = '';
+                    }
+                },
+                updateDueDateDay() {
+                    if (this.selectedDate) {
+                        let parts = this.selectedDate.split('-');
+                        if(parts.length === 3) {
+                            this.$refs.due_date_day.value = parseInt(parts[2], 10);
+                        }
+                    }
+                }
+            }">
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
                     <div>
                         <label class="block mb-2 text-sm font-medium text-gray-900">Nama Lengkap *</label>
@@ -103,11 +124,13 @@
                     </div>
                     <div>
                         <label class="block mb-2 text-sm font-medium text-gray-900">Nominal Tagihan (Rp) *</label>
-                        <input type="number" name="bill_amount" required class="input-field">
+                        <input type="text" x-model="formattedAmount" @input="formatCurrency" required placeholder="800.000" class="input-field">
+                        <input type="hidden" name="bill_amount" :value="rawAmount">
                     </div>
                     <div>
-                        <label class="block mb-2 text-sm font-medium text-gray-900">Tgl Jatuh Tempo (1-31) *</label>
-                        <input type="number" name="due_date_day" min="1" max="31" required class="input-field">
+                        <label class="block mb-2 text-sm font-medium text-gray-900">Tgl Jatuh Tempo *</label>
+                        <input type="date" x-model="selectedDate" @change="updateDueDateDay" required class="input-field">
+                        <input type="hidden" name="due_date_day" x-ref="due_date_day">
                     </div>
                     <div class="flex items-center mt-6">
                         <input type="checkbox" name="is_active" id="is_active" checked class="w-4 h-4 text-indigo-600 bg-gray-100 rounded border-gray-300 focus:ring-indigo-500">
