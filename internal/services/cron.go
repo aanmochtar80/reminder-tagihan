@@ -6,6 +6,7 @@ import (
 	"log"
 	"reminder-tagihan/internal/configs"
 	"reminder-tagihan/internal/models"
+	"strconv"
 	"strings"
 	"text/template"
 	"time"
@@ -26,6 +27,22 @@ func InitCron() {
 	
 	ReminderCron.Start()
 	log.Println("Cron scheduler started")
+}
+
+func formatCurrency(amount float64) string {
+	s := strconv.FormatFloat(amount, 'f', 0, 64)
+	n := len(s)
+	if n <= 3 {
+		return s
+	}
+	out := make([]byte, 0, n+(n-1)/3)
+	for i := 0; i < n; i++ {
+		out = append(out, s[i])
+		if (n-i-1)%3 == 0 && i != n-1 {
+			out = append(out, '.')
+		}
+	}
+	return string(out)
 }
 
 func ProcessReminders() {
@@ -79,7 +96,7 @@ func ProcessReminders() {
 			data := map[string]interface{}{
 				"nama":    inv.Customer.Name,
 				"layanan": inv.ItemName,
-				"nominal": inv.Amount,
+				"nominal": formatCurrency(inv.Amount),
 				"tanggal": inv.DueDate.Format("02 Jan 2006"),
 				"invoice": inv.InvoiceNumber,
 			}
