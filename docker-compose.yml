@@ -12,5 +12,5 @@ services:
     environment:
       - APP_ENV=production
       - PORT=8080
-      - TZ=Asia/Jakarta
+      - TZ=Asia/Makassar
     restart: unless-stopped
