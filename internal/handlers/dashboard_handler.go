@@ -22,9 +22,10 @@ func ShowDashboard(c *gin.Context) {
 	configs.DB.Model(&models.Customer{}).Count(&totalCustomers)
 
 	now := time.Now()
-	todayStart := time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, now.Location())
+	// Use UTC to match the timezone used by time.Parse("2006-01-02") so SQLite string comparisons work correctly
+	todayStart := time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, time.UTC)
 	todayEnd := todayStart.Add(24 * time.Hour)
-	firstOfMonth := time.Date(now.Year(), now.Month(), 1, 0, 0, 0, 0, now.Location())
+	firstOfMonth := time.Date(now.Year(), now.Month(), 1, 0, 0, 0, 0, time.UTC)
 	lastOfMonth := firstOfMonth.AddDate(0, 1, 0).Add(-time.Nanosecond)
 
 	var totalInvoicesMonth float64
