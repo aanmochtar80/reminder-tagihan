@@ -133,6 +133,7 @@ func main() {
 		protected.POST("/whatsapp/disconnect", handlers.DisconnectWhatsApp)
 		protected.GET("/settings", handlers.ShowSettings)
 		protected.POST("/settings", handlers.UpdateSettings)
+		protected.POST("/settings/password", handlers.UpdatePassword)
 		protected.GET("/logs", handlers.ShowLogs)
 	}
 
