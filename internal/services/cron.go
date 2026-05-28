@@ -37,8 +37,12 @@ func processReminders() {
 	var invoices []models.Invoice
 	configs.DB.Preload("Customer").Where("status != ?", "paid").Find(&invoices)
 
-	// Settings for template - hardcoded for now, could fetch from DB
+	// Fetch custom template from Settings DB
+	var setting models.Setting
 	tmplStr := "Halo {{.nama}},\n\nTagihan layanan {{.layanan}} Anda sebesar Rp {{.nominal}} akan jatuh tempo pada {{.tanggal}}.\n\nMohon segera melakukan pembayaran. Abaikan pesan ini jika sudah membayar.\n\nTerima kasih."
+	if err := configs.DB.Where("key = ?", "reminder_template").First(&setting).Error; err == nil && setting.Value != "" {
+		tmplStr = setting.Value
+	}
 	tmpl, err := template.New("msg").Parse(tmplStr)
 	if err != nil {
 		log.Printf("Failed to parse template: %v", err)
