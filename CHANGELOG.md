@@ -11,6 +11,7 @@ Semua perubahan dan pencapaian pada proyek **Reminder Tagihan** akan didokumenta
 - **Template WhatsApp**: Menambahkan template informasi rekening pembayaran (BNI, BCA, Jago, DANA, OVO).
 - **Template WhatsApp**: Mendesain ulang struktur pesan pengingat tagihan dengan tambahan *emoji* dan format tebal (*bold*) agar lebih menarik dan interaktif, baik di tingkat sistem maupun UI.
 - **Lokalisasi**: Menyesuaikan setelan *timezone* pada `docker-compose.yml` menjadi `Asia/Makassar` (WITA) agar sinkron dengan domisili server klien.
+- **Pengingat Manual (Terpilih)**: Menambahkan fitur _checkbox_ pada tabel tagihan untuk memilih secara spesifik pelanggan mana yang akan dikirimi pesan pengingat WhatsApp secara manual, tanpa terikat tanggal jatuh tempo otomatis.
 
 ### 🎨 Pembaruan Tampilan (UI/UX)
 - **Aksi Modern**: Merombak total tombol "Aksi" pada tabel Tagihan dan Pelanggan dari tombol blok teks kaku menjadi kumpulan Ikon SVG interaktif (*Heroicons*) yang minimalis dan elegan.
@@ -22,3 +23,5 @@ Semua perubahan dan pencapaian pada proyek **Reminder Tagihan** akan didokumenta
 - **Dashboard Statis**: Memperbaiki angka *Dashboard* yang sebelumnya hanya *placeholder* 0. Kini seluruh angka (Tagihan Bulan Ini, Jatuh Tempo Hari Ini, Telat Bayar) dihitung 100% dinamis dari kumpulan data asli di *database*.
 - **Isu Zona Waktu (Timezone Miscalculation)**: Memperbaiki logika perbandingan tanggal di SQLite yang menyebabkan tagihan jatuh tempo terlempar ke daftar *Overdue* lebih cepat dari seharusnya. Diselesaikan dengan menyamakan parameter *query* menggunakan waktu absolut (UTC).
 - **Polling WhatsApp Gateway**: Memperbaiki *bug* antarmuka di mana kode QR akan *stuck/loading* abadi sesaat setelah pengguna melakukan *logout*. Diselesaikan dengan memicu fungsi inisialisasi ulang (*Re-initialize Client*) tepat setelah pemutusan sesi.
+- **Timeout Pengiriman Pesan (ERR_CONNECTION_CLOSED)**: Memperbaiki kendala koneksi terputus saat mengirim pesan pengingat secara manual akibat memakan waktu terlalu lama. Diselesaikan dengan mengalihkan proses ke latar belakang (_asynchronous background process_).
+- **Konflik Build Docker**: Memperbaiki *error* `redeclared func main` saat menjalankan `docker-compose build` dengan menghapus berkas uji coba *cron* sementara yang tidak sengaja tertinggal di struktur utama aplikasi.
