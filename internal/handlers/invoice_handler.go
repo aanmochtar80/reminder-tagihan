@@ -85,7 +85,12 @@ func GenerateInvoices(c *gin.Context) {
 }
 
 func TriggerReminders(c *gin.Context) {
-	services.ProcessReminders()
+	go services.ProcessReminders()
+
+	session := sessions.Default(c)
+	session.Set("flash", "Proses pengiriman pengingat WhatsApp sedang berjalan di latar belakang.")
+	session.Save()
+
 	c.Redirect(http.StatusFound, "/invoices")
 }
 
