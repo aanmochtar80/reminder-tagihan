@@ -30,9 +30,6 @@ func InitWhatsApp() {
 			log.Fatalf("Failed to connect to WhatsApp database: %v", err)
 		}
 	}
-	if err != nil {
-		log.Fatalf("Failed to connect to WhatsApp database: %v", err)
-	}
 
 	deviceStore, err := storeContainer.GetFirstDevice(context.Background())
 	if err != nil {
