@@ -51,10 +51,6 @@ func InitWhatsApp() {
 	if WAClient.Store.ID == nil {
 		// No ID stored, new login
 		qrChan, _ := WAClient.GetQRChannel(context.Background())
-		err = WAClient.Connect()
-		if err != nil {
-			log.Fatalf("Failed to connect to WhatsApp: %v", err)
-		}
 		
 		go func() {
 			for evt := range qrChan {
@@ -67,6 +63,11 @@ func InitWhatsApp() {
 				}
 			}
 		}()
+
+		err = WAClient.Connect()
+		if err != nil {
+			log.Fatalf("Failed to connect to WhatsApp: %v", err)
+		}
 	} else {
 		// Already logged in, just connect
 		err = WAClient.Connect()
