@@ -1,0 +1,115 @@
+{{template "dashboard_header.html" .}}
+<div class="mb-8">
+    <h1 class="text-2xl md:text-3xl text-gray-800 font-bold">WhatsApp Gateway</h1>
+    <p class="text-gray-500 mt-1">Kelola koneksi perangkat WhatsApp Anda untuk pengiriman pengingat otomatis.</p>
+</div>
+
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+    <div class="bg-white p-6 shadow-sm rounded-xl border border-gray-100">
+        <h3 class="text-lg font-semibold text-gray-800 mb-4">Status Koneksi</h3>
+        
+        <div class="mb-6 flex items-center">
+            <div class="mr-4">
+                {{if eq .Status "Connected & Logged In"}}
+                <span class="flex h-10 w-10 relative">
+                    <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+                    <span class="relative inline-flex rounded-full h-10 w-10 bg-green-500 flex items-center justify-center text-white">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                    </span>
+                </span>
+                {{else}}
+                <span class="inline-flex rounded-full h-10 w-10 bg-red-100 flex items-center justify-center text-red-500">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </span>
+                {{end}}
+            </div>
+            <div>
+                <p class="text-sm text-gray-500">Status saat ini</p>
+                <p class="text-lg font-bold text-gray-900">{{.Status}}</p>
+            </div>
+        </div>
+
+        {{if eq .Status "Connected & Logged In"}}
+        <form action="/whatsapp/disconnect" method="POST" onsubmit="return confirm('Yakin ingin memutuskan koneksi?');">
+            <button type="submit" class="btn-primary bg-red-600 hover:bg-red-700 w-full flex justify-center">Putuskan Koneksi (Logout)</button>
+        </form>
+        {{else}}
+        <div x-data="qrCodeFetcher()" x-init="fetchQR()" class="flex flex-col items-center">
+            <p class="text-sm text-gray-600 mb-4 text-center">Scan QR Code di bawah menggunakan WhatsApp di HP Anda (Perangkat Tertaut).</p>
+            
+            <div id="qrcode" class="p-4 bg-white border border-gray-200 rounded-lg shadow-sm w-64 h-64 flex items-center justify-center">
+                <span x-show="loading" class="text-gray-400">Memuat QR Code...</span>
+            </div>
+
+            <p x-show="error" class="text-red-500 text-sm mt-4 text-center">Gagal memuat QR Code. <button @click="fetchQR()" class="underline text-indigo-600">Coba lagi</button></p>
+        </div>
+        {{end}}
+    </div>
+
+    <!-- Logs Summary -->
+    <div class="bg-white p-6 shadow-sm rounded-xl border border-gray-100">
+        <h3 class="text-lg font-semibold text-gray-800 mb-4">Informasi Integrasi</h3>
+        <ul class="space-y-3 text-sm text-gray-600">
+            <li class="flex items-start">
+                <svg class="w-5 h-5 text-indigo-500 mr-2 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                <span>Aplikasi ini menggunakan Multi-Device WhatsApp. HP Anda tidak perlu selalu online setelah berhasil terhubung.</span>
+            </li>
+            <li class="flex items-start">
+                <svg class="w-5 h-5 text-indigo-500 mr-2 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                <span>Sistem secara otomatis akan mengecek tagihan dan mengirim notifikasi sesuai jadwal cron.</span>
+            </li>
+        </ul>
+    </div>
+</div>
+
+{{define "scripts"}}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script>
+    document.addEventListener('alpine:init', () => {
+        Alpine.data('qrCodeFetcher', () => ({
+            loading: true,
+            error: false,
+            qrObject: null,
+            interval: null,
+
+            fetchQR() {
+                this.loading = true;
+                this.error = false;
+                
+                const getQR = () => {
+                    fetch('/api/whatsapp/qr')
+                        .then(res => res.json())
+                        .then(data => {
+                            if (data.status === 'logged_in') {
+                                window.location.reload();
+                                return;
+                            }
+                            if (data.qr && data.qr !== "") {
+                                this.loading = false;
+                                if (!this.qrObject) {
+                                    document.getElementById('qrcode').innerHTML = ""; // clear loading
+                                    this.qrObject = new QRCode(document.getElementById("qrcode"), {
+                                        text: data.qr,
+                                        width: 200,
+                                        height: 200,
+                                    });
+                                } else {
+                                    this.qrObject.clear();
+                                    this.qrObject.makeCode(data.qr);
+                                }
+                            }
+                        })
+                        .catch(err => {
+                            console.error(err);
+                            // don't set error immediately, wait for next poll
+                        });
+                };
+
+                getQR();
+                this.interval = setInterval(getQR, 5000); // poll every 5 seconds
+            }
+        }))
+    })
+</script>
+{{end}}
+{{template "dashboard_footer.html" .}}

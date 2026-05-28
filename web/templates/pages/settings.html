@@ -1,0 +1,24 @@
+{{template "dashboard_header.html" .}}
+<div class="mb-8">
+    <h1 class="text-2xl md:text-3xl text-gray-800 font-bold">Pengaturan Aplikasi</h1>
+</div>
+
+<div class="bg-white p-6 shadow-sm rounded-xl border border-gray-100 max-w-3xl">
+    <form action="/settings" method="POST">
+        <div class="space-y-6">
+            <div>
+                <label class="block mb-2 text-sm font-medium text-gray-900">Nama Perusahaan</label>
+                <input type="text" name="company_name" value="{{.Settings.company_name}}" class="input-field" placeholder="PT Contoh Maju Bersama">
+            </div>
+            <div>
+                <label class="block mb-2 text-sm font-medium text-gray-900">Template Pesan Pengingat (Tagihan)</label>
+                <textarea name="reminder_template" rows="4" class="input-field" placeholder="Halo {{.nama}}, tagihan..."></textarea>
+                <p class="mt-1 text-xs text-gray-500">Variabel yang didukung: <code>{{`{{.nama}}`}}</code>, <code>{{`{{.layanan}}`}}</code>, <code>{{`{{.nominal}}`}}</code>, <code>{{`{{.tanggal}}`}}</code>.</p>
+            </div>
+            <div class="border-t border-gray-100 pt-5">
+                <button type="submit" class="btn-primary">Simpan Pengaturan</button>
+            </div>
+        </div>
+    </form>
+</div>
+{{template "dashboard_footer.html" .}}

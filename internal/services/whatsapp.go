@@ -1,0 +1,82 @@
+package services
+
+import (
+	"context"
+	"fmt"
+	"log"
+
+	"go.mau.fi/whatsmeow"
+	"go.mau.fi/whatsmeow/store/sqlstore"
+	waLog "go.mau.fi/whatsmeow/util/log"
+	"go.mau.fi/whatsmeow/types"
+	waProto "go.mau.fi/whatsmeow/binary/proto"
+	"google.golang.org/protobuf/proto"
+)
+
+var WAClient *whatsmeow.Client
+var QRChan chan string
+
+func InitWhatsApp() {
+	dbLog := waLog.Stdout("Database", "WARN", true)
+	// We use a separate sqlite file for whatsapp session
+	storeContainer, err := sqlstore.New(context.Background(), "sqlite", "file:database/whatsapp.db?_pragma=foreign_keys(1)", dbLog)
+	if err != nil {
+		log.Fatalf("Failed to connect to WhatsApp database: %v", err)
+	}
+
+	deviceStore, err := storeContainer.GetFirstDevice(context.Background())
+	if err != nil {
+		log.Fatalf("Failed to get device: %v", err)
+	}
+
+	clientLog := waLog.Stdout("Client", "WARN", true)
+	WAClient = whatsmeow.NewClient(deviceStore, clientLog)
+	
+	QRChan = make(chan string)
+
+	if WAClient.Store.ID == nil {
+		// No ID stored, new login
+		qrChan, _ := WAClient.GetQRChannel(context.Background())
+		err = WAClient.Connect()
+		if err != nil {
+			log.Fatalf("Failed to connect to WhatsApp: %v", err)
+		}
+		
+		go func() {
+			for evt := range qrChan {
+				if evt.Event == "code" {
+					// Send QR code to channel so handler can read it
+					select {
+					case QRChan <- evt.Code:
+					default:
+						// if no one is reading, just drop or replace
+					}
+				} else {
+					fmt.Println("WhatsApp Login event:", evt.Event)
+				}
+			}
+		}()
+	} else {
+		// Already logged in, just connect
+		err = WAClient.Connect()
+		if err != nil {
+			log.Fatalf("Failed to connect to WhatsApp: %v", err)
+		}
+		log.Println("WhatsApp already logged in")
+	}
+}
+
+// SendMessage sends a text message to a specific number (e.g. "62812345678@s.whatsapp.net")
+func SendMessage(jid string, message string) error {
+	if WAClient == nil || !WAClient.IsLoggedIn() {
+		return fmt.Errorf("whatsapp not logged in")
+	}
+
+	jidParsed, err := types.ParseJID(jid)
+	if err != nil {
+		return err
+	}
+	msg := &waProto.Message{Conversation: proto.String(message)}
+	_, err = WAClient.SendMessage(context.Background(), jidParsed, msg)
+	return err
+}

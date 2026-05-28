@@ -1,0 +1,26 @@
+# Binaries
+main
+main.exe
+reminder_tagihan
+reminder_tagihan.exe
+
+# Node modules
+node_modules/
+
+# Environment files
+.env
+
+# Database
+database/
+*.db
+*.db-journal
+*.sqlite
+*.sqlite3
+
+# OS generated files
+.DS_Store
+Thumbs.db
+
+# Go workspaces
+go.work
+go.work.sum

@@ -1,0 +1,14 @@
+{
+  "name": "reminder-tagihan",
+  "version": "1.0.0",
+  "description": "Reminder Tagihan Web App",
+  "main": "index.js",
+  "scripts": {
+    "build:css": "tailwindcss -i ./web/static/css/input.css -o ./web/static/css/style.css --minify",
+    "watch:css": "tailwindcss -i ./web/static/css/input.css -o ./web/static/css/style.css --watch"
+  },
+  "devDependencies": {
+    "@tailwindcss/forms": "^0.5.9",
+    "tailwindcss": "^3.4.1"
+  }
+}
