@@ -12,7 +12,15 @@
             </div>
             <div>
                 <label class="block mb-2 text-sm font-medium text-gray-900">Template Pesan Pengingat (Tagihan)</label>
-                <textarea name="reminder_template" rows="4" class="input-field" placeholder="Halo {{.nama}}, tagihan..."></textarea>
+                <textarea name="reminder_template" rows="8" class="input-field" placeholder="Halo {{`{{.nama}}`}}, tagihan...">{{if .Settings.reminder_template}}{{.Settings.reminder_template}}{{else}}Halo *{{`{{.nama}}`}}*,
+
+Ini adalah pesan pengingat otomatis dari *{{if .Settings.company_name}}{{.Settings.company_name}}{{else}}Manajemen Tagihan{{end}}*.
+
+Kami ingin menginformasikan bahwa tagihan untuk layanan paket *{{`{{.layanan}}`}}* Anda sebesar *Rp {{`{{.nominal}}`}}* telah/akan jatuh tempo pada tanggal *{{`{{.tanggal}}`}}*.
+
+Mohon untuk dapat melakukan pembayaran agar layanan Anda dapat terus dinikmati tanpa kendala. Abaikan pesan ini jika Anda telah menyelesaikan pembayaran.
+
+Terima kasih atas kerja sama Anda!{{end}}</textarea>
                 <p class="mt-1 text-xs text-gray-500">Variabel yang didukung: <code>{{`{{.nama}}`}}</code>, <code>{{`{{.layanan}}`}}</code>, <code>{{`{{.nominal}}`}}</code>, <code>{{`{{.tanggal}}`}}</code>.</p>
             </div>
             <div class="border-t border-gray-100 pt-5">
