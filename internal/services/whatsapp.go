@@ -15,15 +15,21 @@ import (
 )
 
 var (
-	WAClient *whatsmeow.Client
-	CurrentQR string
-	qrMutex   sync.RWMutex
+	WAClient       *whatsmeow.Client
+	CurrentQR      string
+	qrMutex        sync.RWMutex
+	storeContainer *sqlstore.Container
 )
 
 func InitWhatsApp() {
-	dbLog := waLog.Stdout("Database", "WARN", true)
-	// We use a separate sqlite file for whatsapp session
-	storeContainer, err := sqlstore.New(context.Background(), "sqlite", "file:database/whatsapp.db?_pragma=foreign_keys(1)", dbLog)
+	if storeContainer == nil {
+		dbLog := waLog.Stdout("Database", "WARN", true)
+		var err error
+		storeContainer, err = sqlstore.New(context.Background(), "sqlite", "file:database/whatsapp.db?_pragma=foreign_keys(1)", dbLog)
+		if err != nil {
+			log.Fatalf("Failed to connect to WhatsApp database: %v", err)
+		}
+	}
 	if err != nil {
 		log.Fatalf("Failed to connect to WhatsApp database: %v", err)
 	}
@@ -34,6 +40,15 @@ func InitWhatsApp() {
 	}
 
 	clientLog := waLog.Stdout("Client", "WARN", true)
+	if WAClient != nil {
+		WAClient.Disconnect()
+	}
+	
+	// Reset CurrentQR before new client
+	qrMutex.Lock()
+	CurrentQR = ""
+	qrMutex.Unlock()
+
 	WAClient = whatsmeow.NewClient(deviceStore, clientLog)
 	
 	if WAClient.Store.ID == nil {

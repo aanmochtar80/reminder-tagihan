@@ -42,6 +42,7 @@ func GetWhatsAppQR(c *gin.Context) {
 func DisconnectWhatsApp(c *gin.Context) {
 	if services.WAClient != nil {
 		services.WAClient.Logout(context.Background())
+		services.InitWhatsApp()
 	}
 	c.Redirect(http.StatusFound, "/whatsapp")
 }
