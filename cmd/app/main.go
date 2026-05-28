@@ -1,9 +1,11 @@
 package main
 
 import (
+	"html/template"
 	"log"
 	"net/http"
 	"os"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 	"github.com/gin-contrib/sessions"
@@ -45,6 +47,25 @@ func main() {
 
 	// Init router
 	r := gin.Default()
+
+	// Setup template functions
+	r.SetFuncMap(template.FuncMap{
+		"formatRupiah": func(amount float64) string {
+			s := strconv.FormatFloat(amount, 'f', 0, 64)
+			n := len(s)
+			if n <= 3 {
+				return s
+			}
+			out := make([]byte, 0, n+(n-1)/3)
+			for i := 0; i < n; i++ {
+				out = append(out, s[i])
+				if (n-i-1)%3 == 0 && i != n-1 {
+					out = append(out, '.')
+				}
+			}
+			return string(out)
+		},
+	})
 
 	// Setup Session
 	secret := os.Getenv("SESSION_SECRET")

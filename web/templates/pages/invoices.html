@@ -43,7 +43,7 @@
                         <div class="font-medium text-gray-900">{{.Customer.Name}}</div>
                         <div class="text-xs text-gray-500">{{.Customer.ServiceName}}</div>
                     </td>
-                    <td class="px-6 py-4 font-medium text-gray-900">Rp {{.Amount}}</td>
+                    <td class="px-6 py-4 font-medium text-gray-900">Rp {{formatRupiah .Amount}}</td>
                     <td class="px-6 py-4">{{.IssueDate.Format "02 Jan 2006"}}</td>
                     <td class="px-6 py-4">{{.DueDate.Format "02 Jan 2006"}}</td>
                     <td class="px-6 py-4 text-center">
