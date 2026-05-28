@@ -8,6 +8,7 @@ reminder_tagihan.exe
 node_modules/
 
 # Environment files
+*.exe
 .env
 
 # Database
