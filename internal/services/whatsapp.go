@@ -79,3 +79,9 @@ func SendMessage(jid string, message string) error {
 	_, err = WAClient.SendMessage(context.Background(), jidParsed, msg)
 	return err
 }
+
+func GetCurrentQR() string {
+	qrMutex.RLock()
+	defer qrMutex.RUnlock()
+	return CurrentQR
+}
