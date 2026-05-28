@@ -7,7 +7,9 @@ type Invoice struct {
 	InvoiceNumber string    `gorm:"uniqueIndex;not null" json:"invoice_number"`
 	CustomerID    uint      `gorm:"index;not null" json:"customer_id"`
 	Customer      Customer  `gorm:"foreignKey:CustomerID" json:"customer"`
+	ItemName      string    `json:"item_name"`
 	Amount        float64   `gorm:"not null" json:"amount"`
+	IsRecurring   bool      `gorm:"default:false" json:"is_recurring"`
 	IssueDate     time.Time `json:"issue_date"`
 	DueDate       time.Time `json:"due_date"`
 	Status        string    `gorm:"default:'pending';comment:'pending, paid, overdue'" json:"status"`

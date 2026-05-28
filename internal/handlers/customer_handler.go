@@ -28,16 +28,10 @@ func ListCustomers(c *gin.Context) {
 }
 
 func CreateCustomer(c *gin.Context) {
-	billAmount, _ := strconv.ParseFloat(c.PostForm("bill_amount"), 64)
-	dueDateDay, _ := strconv.Atoi(c.PostForm("due_date_day"))
-
 	customer := models.Customer{
 		Name:        c.PostForm("name"),
 		Phone:       c.PostForm("phone"),
 		Address:     c.PostForm("address"),
-		ServiceName: c.PostForm("service_name"),
-		BillAmount:  billAmount,
-		DueDateDay:  dueDateDay,
 		IsActive:    c.PostForm("is_active") == "on",
 		Notes:       c.PostForm("notes"),
 	}

@@ -26,9 +26,7 @@
             <thead class="text-xs text-gray-700 uppercase bg-gray-50 border-b border-gray-200">
                 <tr>
                     <th class="px-6 py-4">Nama & Kontak</th>
-                    <th class="px-6 py-4">Layanan</th>
-                    <th class="px-6 py-4">Tagihan</th>
-                    <th class="px-6 py-4">Jatuh Tempo (Tgl)</th>
+                    <th class="px-6 py-4">Alamat</th>
                     <th class="px-6 py-4 text-center">Status</th>
                     <th class="px-6 py-4">Aksi</th>
                 </tr>
@@ -40,9 +38,7 @@
                         <div class="font-medium text-gray-900">{{.Name}}</div>
                         <div class="text-xs text-gray-500">{{.Phone}}</div>
                     </td>
-                    <td class="px-6 py-4">{{.ServiceName}}</td>
-                    <td class="px-6 py-4 font-medium text-gray-900">Rp {{formatRupiah .BillAmount}}</td>
-                    <td class="px-6 py-4">Tgl {{.DueDateDay}}</td>
+                    <td class="px-6 py-4">{{.Address}}</td>
                     <td class="px-6 py-4 text-center">
                         {{if .IsActive}}
                         <span class="bg-green-100 text-green-800 text-xs font-semibold px-2.5 py-0.5 rounded-full">Aktif</span>
@@ -56,7 +52,7 @@
                 </tr>
                 {{else}}
                 <tr>
-                    <td colspan="6" class="px-6 py-8 text-center text-gray-500">
+                    <td colspan="4" class="px-6 py-8 text-center text-gray-500">
                         Tidak ada data pelanggan.
                     </td>
                 </tr>
@@ -83,28 +79,7 @@
                 </button>
             </div>
             
-            <form action="/customers" method="POST" class="p-6" x-data="{ 
-                rawAmount: '', 
-                formattedAmount: '',
-                selectedDate: '',
-                formatCurrency() {
-                    let val = this.formattedAmount.replace(/\D/g, '');
-                    this.rawAmount = val;
-                    if (val) {
-                        this.formattedAmount = new Intl.NumberFormat('id-ID').format(val);
-                    } else {
-                        this.formattedAmount = '';
-                    }
-                },
-                updateDueDateDay() {
-                    if (this.selectedDate) {
-                        let parts = this.selectedDate.split('-');
-                        if(parts.length === 3) {
-                            this.$refs.due_date_day.value = parseInt(parts[2], 10);
-                        }
-                    }
-                }
-            }">
+            <form action="/customers" method="POST" class="p-6">
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
                     <div>
                         <label class="block mb-2 text-sm font-medium text-gray-900">Nama Lengkap *</label>
@@ -114,34 +89,21 @@
                         <label class="block mb-2 text-sm font-medium text-gray-900">Nomor WhatsApp *</label>
                         <input type="text" name="phone" required placeholder="08..." class="input-field">
                     </div>
-                    <div class="md:col-span-2">
-                        <label class="block mb-2 text-sm font-medium text-gray-900">Alamat</label>
-                        <textarea name="address" rows="2" class="input-field"></textarea>
-                    </div>
-                    <div>
-                        <label class="block mb-2 text-sm font-medium text-gray-900">Nama Layanan / Paket *</label>
-                        <input type="text" name="service_name" required class="input-field">
-                    </div>
-                    <div>
-                        <label class="block mb-2 text-sm font-medium text-gray-900">Nominal Tagihan (Rp) *</label>
-                        <input type="text" x-model="formattedAmount" @input="formatCurrency" required placeholder="800.000" class="input-field">
-                        <input type="hidden" name="bill_amount" :value="rawAmount">
-                    </div>
-                    <div>
-                        <label class="block mb-2 text-sm font-medium text-gray-900">Tgl Jatuh Tempo *</label>
-                        <input type="date" x-model="selectedDate" @change="updateDueDateDay" required class="input-field">
-                        <input type="hidden" name="due_date_day" x-ref="due_date_day">
-                    </div>
-                    <div class="flex items-center mt-6">
+                </div>
+                <div class="mb-6">
+                    <label class="block mb-2 text-sm font-medium text-gray-900">Alamat</label>
+                    <textarea name="address" rows="3" class="input-field"></textarea>
+                </div>
+                <div class="mb-6">
+                    <div class="flex items-center">
                         <input type="checkbox" name="is_active" id="is_active" checked class="w-4 h-4 text-indigo-600 bg-gray-100 rounded border-gray-300 focus:ring-indigo-500">
                         <label for="is_active" class="ml-2 text-sm font-medium text-gray-900">Status Aktif</label>
                     </div>
-                    <div class="md:col-span-2">
-                        <label class="block mb-2 text-sm font-medium text-gray-900">Catatan Tambahan</label>
-                        <input type="text" name="notes" class="input-field">
-                    </div>
                 </div>
-                
+                <div class="mb-6">
+                    <label class="block mb-2 text-sm font-medium text-gray-900">Catatan Tambahan</label>
+                    <input type="text" name="notes" class="input-field">
+                </div>
                 <div class="flex items-center justify-end space-x-2 border-t border-gray-100 pt-5">
                     <button type="button" @click="open = false" class="text-gray-500 bg-white hover:bg-gray-100 focus:ring-4 focus:outline-none focus:ring-gray-200 rounded-lg border border-gray-200 text-sm font-medium px-5 py-2.5 hover:text-gray-900 focus:z-10">Batal</button>
                     <button type="submit" class="text-white bg-indigo-600 hover:bg-indigo-700 focus:ring-4 focus:outline-none focus:ring-indigo-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center">Simpan Pelanggan</button>

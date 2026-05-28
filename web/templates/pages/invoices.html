@@ -18,6 +18,10 @@
         <form method="POST" action="/invoices/send-reminders" class="inline" onsubmit="return confirm('Kirim pengingat WhatsApp ke semua tagihan jatuh tempo sekarang?');">
             <button type="submit" class="btn-primary">Kirim Pengingat (Manual)</button>
         </form>
+        <button x-data @click="$dispatch('open-modal')" class="btn-primary flex items-center bg-green-600 hover:bg-green-700 ml-2">
+            <svg class="w-4 h-4 fill-current opacity-50 shrink-0 mr-2" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg"><path d="M15 7H9V1c0-.6-.4-1-1-1S7 .4 7 1v6H1c-.6 0-1 .4-1 1s.4 1 1 1h6v6c0 .6.4 1 1 1s1-.4 1-1V9h6c.6 0 1-.4 1-1s-.4-1-1-1z" /></svg>
+            <span>Tambah Tagihan</span>
+        </button>
     </div>
 </div>
 
@@ -28,6 +32,7 @@
                 <tr>
                     <th class="px-6 py-4">No. Invoice</th>
                     <th class="px-6 py-4">Pelanggan</th>
+                    <th class="px-6 py-4">Layanan / Item</th>
                     <th class="px-6 py-4">Nominal</th>
                     <th class="px-6 py-4">Tgl Dibuat</th>
                     <th class="px-6 py-4">Jatuh Tempo</th>
@@ -41,7 +46,16 @@
                     <td class="px-6 py-4 font-medium text-indigo-600">{{.InvoiceNumber}}</td>
                     <td class="px-6 py-4">
                         <div class="font-medium text-gray-900">{{.Customer.Name}}</div>
-                        <div class="text-xs text-gray-500">{{.Customer.ServiceName}}</div>
+                        <div class="text-xs text-gray-500">{{.Customer.Phone}}</div>
+                    </td>
+                    <td class="px-6 py-4">
+                        <div class="font-medium text-gray-900">{{if .ItemName}}{{.ItemName}}{{else}}Tagihan Layanan{{end}}</div>
+                        {{if .IsRecurring}}
+                        <span class="inline-flex items-center gap-1 bg-indigo-100 text-indigo-700 text-[10px] font-semibold px-2 py-0.5 rounded-full mt-1">
+                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
+                            Berulang
+                        </span>
+                        {{end}}
                     </td>
                     <td class="px-6 py-4 font-medium text-gray-900">Rp {{formatRupiah .Amount}}</td>
                     <td class="px-6 py-4">{{.IssueDate.Format "02 Jan 2006"}}</td>
@@ -74,4 +88,76 @@
         </table>
     </div>
 </div>
+
+<!-- Modal Tambah Tagihan -->
+<div x-data="{ 
+        open: false,
+        rawAmount: '', 
+        formattedAmount: '',
+        formatCurrency() {
+            let val = this.formattedAmount.replace(/\D/g, '');
+            this.rawAmount = val;
+            if (val) {
+                this.formattedAmount = new Intl.NumberFormat('id-ID').format(val);
+            } else {
+                this.formattedAmount = '';
+            }
+        }
+     }" 
+     @open-modal.window="open = true" 
+     @keydown.escape.window="open = false"
+     x-show="open" 
+     class="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto overflow-x-hidden bg-gray-900 bg-opacity-50"
+     style="display: none;">
+    
+    <div @click.outside="open = false" class="relative p-4 w-full max-w-2xl h-full md:h-auto">
+        <div class="relative bg-white rounded-xl shadow-lg border border-gray-100">
+            <div class="flex justify-between items-center p-5 rounded-t border-b border-gray-100">
+                <h3 class="text-xl font-semibold text-gray-900">Buat Tagihan Baru</h3>
+                <button @click="open = false" class="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm p-1.5 ml-auto inline-flex items-center">
+                    <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path></svg>
+                </button>
+            </div>
+            
+            <form action="/invoices" method="POST" class="p-6">
+                <div class="mb-6">
+                    <label class="block mb-2 text-sm font-medium text-gray-900">Pelanggan *</label>
+                    <select name="customer_id" required class="input-field">
+                        <option value="">-- Pilih Pelanggan --</option>
+                        {{range .Customers}}
+                        <option value="{{.ID}}">{{.Name}} ({{.Phone}})</option>
+                        {{end}}
+                    </select>
+                </div>
+                <div class="mb-6">
+                    <label class="block mb-2 text-sm font-medium text-gray-900">Nama Layanan / Keterangan Tagihan *</label>
+                    <input type="text" name="item_name" required class="input-field" placeholder="Contoh: Paket Internet 20 Mbps">
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                    <div>
+                        <label class="block mb-2 text-sm font-medium text-gray-900">Nominal Tagihan (Rp) *</label>
+                        <input type="text" x-model="formattedAmount" @input="formatCurrency" required placeholder="800.000" class="input-field">
+                        <input type="hidden" name="amount" :value="rawAmount">
+                    </div>
+                    <div>
+                        <label class="block mb-2 text-sm font-medium text-gray-900">Tanggal Jatuh Tempo *</label>
+                        <input type="date" name="due_date" required class="input-field">
+                    </div>
+                </div>
+                <div class="mb-6">
+                    <div class="flex items-center">
+                        <input type="checkbox" name="is_recurring" id="is_recurring" class="w-4 h-4 text-indigo-600 bg-gray-100 rounded border-gray-300 focus:ring-indigo-500">
+                        <label for="is_recurring" class="ml-2 text-sm font-medium text-gray-900">Tagihan Berulang (Otomatis ditagihkan lagi setiap bulan)</label>
+                    </div>
+                </div>
+                
+                <div class="flex items-center justify-end space-x-2 border-t border-gray-100 pt-5">
+                    <button type="button" @click="open = false" class="text-gray-500 bg-white hover:bg-gray-100 focus:ring-4 focus:outline-none focus:ring-gray-200 rounded-lg border border-gray-200 text-sm font-medium px-5 py-2.5 hover:text-gray-900 focus:z-10">Batal</button>
+                    <button type="submit" class="text-white bg-indigo-600 hover:bg-indigo-700 focus:ring-4 focus:outline-none focus:ring-indigo-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center">Buat Tagihan</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
 {{template "dashboard_footer.html" .}}

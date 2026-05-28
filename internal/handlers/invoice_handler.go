@@ -24,6 +24,9 @@ func ListInvoices(c *gin.Context) {
 	
 	query.Find(&invoices)
 
+	var activeCustomers []models.Customer
+	configs.DB.Where("is_active = ?", true).Order("name asc").Find(&activeCustomers)
+
 	session := sessions.Default(c)
 	flashMsg := session.Get("flash")
 	if flashMsg != nil {
@@ -33,6 +36,7 @@ func ListInvoices(c *gin.Context) {
 
 	c.HTML(http.StatusOK, "invoices.html", gin.H{
 		"Invoices":     invoices,
+		"Customers":    activeCustomers,
 		"StatusFilter": statusFilter,
 		"FlashMessage": flashMsg,
 	})
@@ -81,5 +85,30 @@ func GenerateInvoices(c *gin.Context) {
 
 func TriggerReminders(c *gin.Context) {
 	services.ProcessReminders()
+	c.Redirect(http.StatusFound, "/invoices")
+}
+
+func CreateInvoice(c *gin.Context) {
+	customerID, _ := strconv.Atoi(c.PostForm("customer_id"))
+	amount, _ := strconv.ParseFloat(c.PostForm("amount"), 64)
+	dueDate, _ := time.Parse("2006-01-02", c.PostForm("due_date"))
+	
+	invoice := models.Invoice{
+		InvoiceNumber: fmt.Sprintf("INV-%s-%d", time.Now().Format("20060102150405"), customerID),
+		CustomerID:    uint(customerID),
+		ItemName:      c.PostForm("item_name"),
+		Amount:        amount,
+		IssueDate:     time.Now(),
+		DueDate:       dueDate,
+		IsRecurring:   c.PostForm("is_recurring") == "on",
+		Status:        "pending",
+	}
+
+	configs.DB.Create(&invoice)
+	
+	session := sessions.Default(c)
+	session.Set("flash", "Tagihan berhasil dibuat.")
+	session.Save()
+	
 	c.Redirect(http.StatusFound, "/invoices")
 }

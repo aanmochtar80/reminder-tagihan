@@ -78,7 +78,7 @@ func ProcessReminders() {
 			var buf bytes.Buffer
 			data := map[string]interface{}{
 				"nama":    inv.Customer.Name,
-				"layanan": inv.Customer.ServiceName,
+				"layanan": inv.ItemName,
 				"nominal": inv.Amount,
 				"tanggal": inv.DueDate.Format("02 Jan 2006"),
 				"invoice": inv.InvoiceNumber,
@@ -116,35 +116,39 @@ func ProcessReminders() {
 
 // Helper to generate monthly invoices (Can be run on the 1st of every month)
 func GenerateMonthlyInvoices() {
-	var customers []models.Customer
-	configs.DB.Where("is_active = ?", true).Find(&customers)
+	var recurringInvoices []models.Invoice
+	configs.DB.Where("is_recurring = ?", true).Order("due_date desc").Find(&recurringInvoices)
 
 	now := time.Now()
-	for _, cust := range customers {
-		// Calculate due date for current month
-		dueDate := time.Date(now.Year(), now.Month(), cust.DueDateDay, 0, 0, 0, 0, now.Location())
-		if dueDate.Before(now) {
-			// If due date is already passed for this month, skip or create for next month
-			// For simplicity, let's just generate for next month if the day has passed significantly
-			// Let's keep it simple: always generate for the current month's due date
-		}
+	processed := make(map[string]bool)
 
-		// Check if invoice for this customer in this month already exists
+	for _, inv := range recurringInvoices {
+		key := fmt.Sprintf("%d_%s", inv.CustomerID, inv.ItemName)
+		if processed[key] {
+			continue
+		}
+		processed[key] = true
+
+		dueDate := time.Date(now.Year(), now.Month(), inv.DueDate.Day(), 0, 0, 0, 0, now.Location())
+
 		var count int64
 		configs.DB.Model(&models.Invoice{}).
-			Where("customer_id = ? AND strftime('%Y-%m', due_date) = ?", cust.ID, dueDate.Format("2006-01")).
+			Where("customer_id = ? AND item_name = ? AND strftime('%Y-%m', due_date) = ?", 
+                  inv.CustomerID, inv.ItemName, dueDate.Format("2006-01")).
 			Count(&count)
 
 		if count == 0 {
-			inv := models.Invoice{
-				InvoiceNumber: fmt.Sprintf("INV-%s-%04d", dueDate.Format("200601"), cust.ID),
-				CustomerID:    cust.ID,
-				Amount:        cust.BillAmount,
+			newInv := models.Invoice{
+				InvoiceNumber: fmt.Sprintf("INV-%s-%d-%d", dueDate.Format("200601"), inv.CustomerID, time.Now().UnixNano()%10000),
+				CustomerID:    inv.CustomerID,
+				ItemName:      inv.ItemName,
+				Amount:        inv.Amount,
+				IsRecurring:   true,
 				IssueDate:     now,
 				DueDate:       dueDate,
 				Status:        "pending",
 			}
-			configs.DB.Create(&inv)
+			configs.DB.Create(&newInv)
 		}
 	}
 }

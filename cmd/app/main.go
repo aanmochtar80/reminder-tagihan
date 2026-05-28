@@ -111,6 +111,7 @@ func main() {
 		protected.GET("/customers", handlers.ListCustomers)
 		protected.POST("/customers", handlers.CreateCustomer)
 		protected.GET("/invoices", handlers.ListInvoices)
+		protected.POST("/invoices", handlers.CreateInvoice)
 		protected.POST("/invoices/generate", handlers.GenerateInvoices)
 		protected.POST("/invoices/send-reminders", handlers.TriggerReminders)
 		protected.POST("/invoices/:id/pay", handlers.MarkInvoicePaid)
