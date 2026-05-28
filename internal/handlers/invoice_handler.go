@@ -5,7 +5,8 @@ import (
 	"net/http"
 	"reminder-tagihan/internal/configs"
 	"reminder-tagihan/internal/models"
-	"time"
+	"reminder-tagihan/internal/services"
+	"strconv"
 
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-gonic/gin"
@@ -70,5 +71,15 @@ func MarkInvoicePaid(c *gin.Context) {
 	}
 	configs.DB.Create(&activity)
 
+	c.Redirect(http.StatusFound, "/invoices")
+}
+
+func GenerateInvoices(c *gin.Context) {
+	services.GenerateMonthlyInvoices()
+	c.Redirect(http.StatusFound, "/invoices")
+}
+
+func TriggerReminders(c *gin.Context) {
+	services.ProcessReminders()
 	c.Redirect(http.StatusFound, "/invoices")
 }

@@ -18,15 +18,17 @@ var ReminderCron *cron.Cron
 func InitCron() {
 	ReminderCron = cron.New()
 	
+	// Generate invoices every day at 01:00 AM (safe because it checks for duplicates)
+	ReminderCron.AddFunc("0 1 * * *", GenerateMonthlyInvoices)
+	
 	// Check invoices every day at 08:00 AM
-	// For testing, let's also run it every minute (you can change it to "0 8 * * *" in production)
-	ReminderCron.AddFunc("0 8 * * *", processReminders)
+	ReminderCron.AddFunc("0 8 * * *", ProcessReminders)
 	
 	ReminderCron.Start()
 	log.Println("Cron scheduler started")
 }
 
-func processReminders() {
+func ProcessReminders() {
 	if WAClient == nil || !WAClient.IsConnected() || !WAClient.IsLoggedIn() {
 		log.Println("Cron skipped: WhatsApp not connected")
 		return

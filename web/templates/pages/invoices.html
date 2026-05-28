@@ -12,6 +12,12 @@
                 <option value="overdue" {{if eq .StatusFilter "overdue"}}selected{{end}}>Overdue</option>
             </select>
         </form>
+        <form method="POST" action="/invoices/generate" class="inline">
+            <button type="submit" class="btn-primary bg-indigo-100 text-indigo-700 hover:bg-indigo-200">Buat Tagihan Bulan Ini</button>
+        </form>
+        <form method="POST" action="/invoices/send-reminders" class="inline" onsubmit="return confirm('Kirim pengingat WhatsApp ke semua tagihan jatuh tempo sekarang?');">
+            <button type="submit" class="btn-primary">Kirim Pengingat (Manual)</button>
+        </form>
     </div>
 </div>
 
