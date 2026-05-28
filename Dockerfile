@@ -22,7 +22,6 @@ RUN apk add --no-cache sqlite-libs tzdata
 
 COPY --from=builder /app/main .
 COPY --from=builder /app/web ./web
-COPY --from=builder /app/.env.example ./.env
 
 # Create database directory
 RUN mkdir -p database
