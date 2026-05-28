@@ -50,8 +50,22 @@ func main() {
 
 	// Setup template functions
 	r.SetFuncMap(template.FuncMap{
-		"formatRupiah": func(amount float64) string {
-			s := strconv.FormatFloat(amount, 'f', 0, 64)
+		"formatRupiah": func(amount interface{}) string {
+			var val float64
+			switch v := amount.(type) {
+			case float64:
+				val = v
+			case float32:
+				val = float64(v)
+			case int:
+				val = float64(v)
+			case int64:
+				val = float64(v)
+			case string:
+				parsed, _ := strconv.ParseFloat(v, 64)
+				val = parsed
+			}
+			s := strconv.FormatFloat(val, 'f', 0, 64)
 			n := len(s)
 			if n <= 3 {
 				return s
