@@ -113,3 +113,34 @@ func CreateInvoice(c *gin.Context) {
 	
 	c.Redirect(http.StatusFound, "/invoices")
 }
+
+func UpdateInvoice(c *gin.Context) {
+	id := c.Param("id")
+	var invoice models.Invoice
+	if err := configs.DB.First(&invoice, id).Error; err != nil {
+		c.Redirect(http.StatusFound, "/invoices")
+		return
+	}
+
+	customerID, _ := strconv.Atoi(c.PostForm("customer_id"))
+	invoice.CustomerID = uint(customerID)
+	invoice.ItemName = c.PostForm("item_name")
+	
+	amount, _ := strconv.ParseFloat(c.PostForm("amount"), 64)
+	invoice.Amount = amount
+	invoice.IsRecurring = c.PostForm("is_recurring") == "on"
+
+	dueDate, err := time.Parse("2006-01-02", c.PostForm("due_date"))
+	if err == nil {
+		invoice.DueDate = dueDate
+	}
+
+	configs.DB.Save(&invoice)
+	c.Redirect(http.StatusFound, "/invoices")
+}
+
+func DeleteInvoice(c *gin.Context) {
+	id := c.Param("id")
+	configs.DB.Delete(&models.Invoice{}, id)
+	c.Redirect(http.StatusFound, "/invoices")
+}
