@@ -4,6 +4,7 @@ import (
 	"net/http"
 	"reminder-tagihan/internal/configs"
 	"reminder-tagihan/internal/models"
+	"time"
 
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-gonic/gin"
@@ -20,12 +21,32 @@ func ShowDashboard(c *gin.Context) {
 	var totalCustomers int64
 	configs.DB.Model(&models.Customer{}).Count(&totalCustomers)
 
-	// In a real app, calculate these based on the current month/day
+	now := time.Now()
+	todayStart := time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, now.Location())
+	todayEnd := todayStart.Add(24 * time.Hour)
+	firstOfMonth := time.Date(now.Year(), now.Month(), 1, 0, 0, 0, 0, now.Location())
+	lastOfMonth := firstOfMonth.AddDate(0, 1, 0).Add(-time.Nanosecond)
+
+	var totalInvoicesMonth float64
+	configs.DB.Model(&models.Invoice{}).
+		Where("due_date >= ? AND due_date <= ?", firstOfMonth, lastOfMonth).
+		Select("COALESCE(SUM(amount), 0)").Scan(&totalInvoicesMonth)
+
+	var dueToday int64
+	configs.DB.Model(&models.Invoice{}).
+		Where("due_date >= ? AND due_date < ? AND status = ?", todayStart, todayEnd, "pending").
+		Count(&dueToday)
+
+	var overdue int64
+	configs.DB.Model(&models.Invoice{}).
+		Where("status = 'overdue' OR (due_date < ? AND status = 'pending')", todayStart).
+		Count(&overdue)
+
 	stats := map[string]interface{}{
 		"TotalCustomers":     totalCustomers,
-		"TotalInvoicesMonth": "0", // Calculate later
-		"DueToday":           0,   // Calculate later
-		"Overdue":            0,   // Calculate later
+		"TotalInvoicesMonth": totalInvoicesMonth, 
+		"DueToday":           dueToday,
+		"Overdue":            overdue,
 	}
 
 	var recentInvoices []models.Invoice
