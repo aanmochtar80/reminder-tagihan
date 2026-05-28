@@ -31,8 +31,8 @@
     <!-- Links -->
     <div class="space-y-8 px-4 py-4">
         <div>
-            <ul class="mt-3 space-y-2">
-                <li class="px-3 py-2 rounded-sm mb-0.5 last:mb-0 bg-gray-800">
+            <ul class="mt-3 space-y-2" x-data="{ currentPath: window.location.pathname }">
+                <li class="px-3 py-2 rounded-sm mb-0.5 last:mb-0 transition duration-150" :class="currentPath.startsWith('/dashboard') ? 'bg-gray-800' : 'hover:bg-gray-800'">
                     <a class="block text-gray-200 hover:text-white truncate transition duration-150" href="/dashboard">
                         <div class="flex items-center">
                             <svg class="shrink-0 h-6 w-6" viewBox="0 0 24 24"><path class="fill-current text-gray-400" d="M12 0C5.383 0 0 5.383 0 12s5.383 12 12 12 12-5.383 12-12S18.617 0 12 0z" /><path class="fill-current text-gray-600" d="M12 3c-4.963 0-9 4.037-9 9s4.037 9 9 9 9-4.037 9-9-4.037-9-9-9z" /><path class="fill-current text-gray-400" d="M12 15c-1.654 0-3-1.346-3-3 0-.462.113-.894.3-1.285L6 6l4.714 3.301A2.973 2.973 0 0112 9c1.654 0 3 1.346 3 3s-1.346 3-3 3z" /></svg>
@@ -40,7 +40,7 @@
                         </div>
                     </a>
                 </li>
-                <li class="px-3 py-2 rounded-sm mb-0.5 last:mb-0 hover:bg-gray-800 transition duration-150">
+                <li class="px-3 py-2 rounded-sm mb-0.5 last:mb-0 transition duration-150" :class="currentPath.startsWith('/customers') ? 'bg-gray-800' : 'hover:bg-gray-800'">
                     <a class="block text-gray-200 hover:text-white truncate transition duration-150" href="/customers">
                         <div class="flex items-center">
                             <svg class="shrink-0 h-6 w-6" viewBox="0 0 24 24"><path class="fill-current text-gray-400" d="M13 15l11-7L11.504.136a1 1 0 00-1.019.007L0 7l13 8z" /><path class="fill-current text-gray-700" d="M13 15L0 7v9c0 .355.189.685.496.864L13 24v-9z" /><path class="fill-current text-gray-600" d="M13 15.047V24l10.573-7.181A.999.999 0 0024 16V8l-11 7.047z" /></svg>
@@ -48,7 +48,7 @@
                         </div>
                     </a>
                 </li>
-                <li class="px-3 py-2 rounded-sm mb-0.5 last:mb-0 hover:bg-gray-800 transition duration-150">
+                <li class="px-3 py-2 rounded-sm mb-0.5 last:mb-0 transition duration-150" :class="currentPath.startsWith('/invoices') ? 'bg-gray-800' : 'hover:bg-gray-800'">
                     <a class="block text-gray-200 hover:text-white truncate transition duration-150" href="/invoices">
                         <div class="flex items-center">
                             <svg class="shrink-0 h-6 w-6" viewBox="0 0 24 24"><path class="fill-current text-gray-600" d="M8 1v2H3v19h18V3h-5V1h7v23H1V1z" /><path class="fill-current text-gray-600" d="M1 1h22v23H1z" /><path class="fill-current text-gray-400" d="M15 10.586L16.414 12 11 17.414 7.586 14 9 12.586l2 2zM5 0h14v4H5z" /></svg>
@@ -56,7 +56,7 @@
                         </div>
                     </a>
                 </li>
-                <li class="px-3 py-2 rounded-sm mb-0.5 last:mb-0 hover:bg-gray-800 transition duration-150">
+                <li class="px-3 py-2 rounded-sm mb-0.5 last:mb-0 transition duration-150" :class="currentPath.startsWith('/whatsapp') ? 'bg-gray-800' : 'hover:bg-gray-800'">
                     <a class="block text-gray-200 hover:text-white truncate transition duration-150" href="/whatsapp">
                         <div class="flex items-center">
                             <svg class="shrink-0 h-6 w-6" viewBox="0 0 24 24"><path class="fill-current text-gray-400" d="M20 7a.75.75 0 01-.75-.75 1.5 1.5 0 00-1.5-1.5.75.75 0 110-1.5 1.5 1.5 0 001.5-1.5.75.75 0 111.5 0 1.5 1.5 0 001.5 1.5.75.75 0 110 1.5 1.5 1.5 0 00-1.5 1.5A.75.75 0 0120 7zM4 23a.75.75 0 01-.75-.75 1.5 1.5 0 00-1.5-1.5.75.75 0 110-1.5 1.5 1.5 0 001.5-1.5.75.75 0 111.5 0 1.5 1.5 0 001.5 1.5.75.75 0 110 1.5 1.5 1.5 0 00-1.5 1.5A.75.75 0 014 23z" /><path class="fill-current text-gray-600" d="M17 23a1 1 0 01-1-1 4 4 0 00-4-4 1 1 0 010-2 4 4 0 004-4 1 1 0 012 0 4 4 0 004 4 1 1 0 010 2 4 4 0 00-4 4 1 1 0 01-1 1zM7 13a1 1 0 01-1-1 4 4 0 00-4-4 1 1 0 110-2 4 4 0 004-4 1 1 0 112 0 4 4 0 004 4 1 1 0 010 2 4 4 0 00-4 4 1 1 0 01-1 1z" /></svg>
@@ -64,7 +64,7 @@
                         </div>
                     </a>
                 </li>
-                <li class="px-3 py-2 rounded-sm mb-0.5 last:mb-0 hover:bg-gray-800 transition duration-150">
+                <li class="px-3 py-2 rounded-sm mb-0.5 last:mb-0 transition duration-150" :class="currentPath.startsWith('/logs') ? 'bg-gray-800' : 'hover:bg-gray-800'">
                     <a class="block text-gray-200 hover:text-white truncate transition duration-150" href="/logs">
                         <div class="flex items-center">
                             <svg class="shrink-0 h-6 w-6" viewBox="0 0 24 24"><path class="fill-current text-gray-400" d="M13 15l11-7L11.504.136a1 1 0 00-1.019.007L0 7l13 8z" /></svg>
@@ -72,7 +72,7 @@
                         </div>
                     </a>
                 </li>
-                <li class="px-3 py-2 rounded-sm mb-0.5 last:mb-0 hover:bg-gray-800 transition duration-150">
+                <li class="px-3 py-2 rounded-sm mb-0.5 last:mb-0 transition duration-150" :class="currentPath.startsWith('/settings') ? 'bg-gray-800' : 'hover:bg-gray-800'">
                     <a class="block text-gray-200 hover:text-white truncate transition duration-150" href="/settings">
                         <div class="flex items-center">
                             <svg class="shrink-0 h-6 w-6" viewBox="0 0 24 24"><path class="fill-current text-gray-600" d="M19.714 14.7l-7.007 7.007-1.414-1.414 7.007-7.007c-.195-.495-.296-1.03-.296-1.586 0-2.206 1.794-4 4-4s4 1.794 4 4-1.794 4-4 4c-.556 0-1.091-.101-1.586-.296zM13 14.586V9h-2v5.586l-4.293 4.293 1.414 1.414L12.414 16l4.293-4.293z" /></svg>
